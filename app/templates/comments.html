@@ -1,0 +1,106 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class = "commentsPage">
+
+    <h1 class="title">Reply to Post</h1>
+    <br>
+    <div class = "mainPost">
+    {% if post %}
+            <table class = "posttable">
+                {% if post.user_id == current_user.id %}
+                <tr> 
+                    <td colspan="3"><div class="posttitle"> Posted by You </div>
+                    </td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td class ="postbody" width= "80%">
+                        <div class="postbody">{{post.body}}</div>
+                        <br>
+                        <div class="posttime">{{ moment(post.timestamp).fromNow() }}</div>
+                    </td>
+                    <td class ="likeImg" width = "5%">
+                        <!-- If the post belongs to local user then display an upvoted version(Unclickable) -->
+                        {% if post.user_id == current_user.id %}
+                            <br>
+                            <img class = "like" src="{{ url_for('static', filename = 'clickedArrowUp.png' )}}"  width="50">
+                            <br>
+                            <div class="likecount">{{post.likes}}</div>
+                            <img class = "like" src="{{ url_for('static', filename = 'arrowDown.png' )}}"  width="50">
+                            <br>
+                        {% else %}
+                            {% set ns = namespace(found=false) %}
+                            <!-- Scroll through posts that user has reacted to and match with current post -->
+                            {% for reaction in user.reactions %}
+                                {% if (reaction.user_id == current_user.id) and (reaction.post == post.id) %}
+                                    {% set ns.found = true %}
+                                    <!-- If they have upvoted it display green up arrow -->
+                                    {% if reaction.status == 1 %}
+                                        {% set ns.found = true %}
+                                        <br>
+                                        <a href="{{ url_for('upVote',post_id=post.id, ref = 1) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'clickedArrowUp.png' )}}"  width="50"> </a>
+                                        <br>
+                                        <div class="likecount">{{post.likes}}</div>
+                                        <a href="{{ url_for('downVote',post_id=post.id, ref = 1) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'arrowDown.png' )}}"  width="50"> </a>
+                                        <br>
+                                    <!-- If they have downvoted it display green down arrow -->
+                                    {% elif reaction.status == -1 %}
+                                        {% set ns.found = true %}
+                                        <br>
+                                        <a href="{{ url_for('upVote',post_id=post.id, ref = 1) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'arrowUp.png' )}}"  width="50"> </a>
+                                        <br>
+                                        <div class="likecount">{{post.likes}}</div>
+                                        <a href="{{ url_for('downVote',post_id=post.id, ref = 1) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'clickedArrowDownn.png' )}}"  width="50"> </a>
+                                        <br>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if ns.found == false %}
+                                <br>
+                                <a href="{{ url_for('upVote',post_id=post.id, ref = 1) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'arrowUp.png' )}}"  width="50"> </a>
+                                <br>
+                                <div class="likecount">{{post.likes}}</div>
+                                <a href="{{ url_for('downVote',post_id=post.id, ref = 1) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'arrowDown.png' )}}"  width="50"> </a>
+                                <br>
+                            {% endif %}
+                        {% endif %}
+                        <br>
+                        <br>
+                    </td>
+                    <td width = "100%">
+                        {% if post.user_id == current_user.id %}
+                            <form action="{{ url_for('delete', post_id = post.id, ref = com) }}" method="post">
+                                <input class = "deletebutton" type="submit" value="⤫ 𝘿𝙀𝙇𝙀𝙏𝙀" >
+                            </form>
+                            <form action="{{ url_for('edit', post_id = post.id, ref = com) }}" method="post">
+                                <input class = "editbutton" type="submit" value="✎ 𝙀𝘿𝙄𝙏" >
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+    {% endif %}
+    </div>
+
+    
+    {% if form %}
+
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <div class = "postlabel">
+                {{ form.body.label }}<br>
+                <div class = "postmessage">{{ form.body}}</div>
+            </div>
+            <div>
+            {{ form.submit(class="button") }}
+            </div>
+        </form>
+    {% endif %}
+  
+    <div class = "postlist">{% for reply in replys %} </div>
+        <div class="mainPost">{% include '_reply.html' %} </div>
+    {% endfor %}
+</div>
+{% endblock %}

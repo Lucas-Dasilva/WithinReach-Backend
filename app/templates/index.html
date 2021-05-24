@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <img class = "homeLogo" src="{{ url_for('static', filename = 'logo3.gif' )}}" >
+    <h1 class= "hometitle">Within Reach</h1>
+
+    {% if sortform %}
+        <form action ="" method = 'POST'> 
+            
+            <div class ="sort">     
+                {{sortform.sort.label}}
+                {{ sortform.sort }}
+                {{ sortform.submit(class="button")}}
+            </div>
+        </form>
+    {% endif %}
+
+    <div class = "postlist">
+        <!-- Display top most if max number of likes matches post with that likes -->
+        {% for post in posts %}
+            {% if (post.likes == topPost) %}
+                <div class = "topPostContainer">
+                    <h1 class = "topPostTitle">Top Post: </h1>
+                    <div class="topPost">{% include '_post.html' %} </div>
+                </div>
+            {% endif%}
+        {% endfor %}
+        <!-- Fail safe check if local user cleared there cache, simply use the values in the userDistace Db instead -->
+        {% if "latitude" in session %}
+            {% for post in posts %}
+                {% if (post.id|string) in session %}
+                    {% if session[(post.id|string)] < 15.0|float %}
+                    <div class="mainPost">{% include '_post.html' %} </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            {% for post in posts %}
+                {% if (post.user_id == current_user.id) %}
+                    <div class="mainPost">{% include '_post.html' %} </div>
+                {% endif%}
+                {% for dist in post.distance_from_user %}
+                    {% if dist.user_id == current_user.id and dist.distance < 15.0|float %}
+                        <div class="mainPost">{% include '_post.html' %} </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        {% endif %}
+
+    </div>
+    
+{% endblock %}

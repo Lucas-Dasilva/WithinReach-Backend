@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1 class="title">Edit Post</h1>
+
+    {% if form %}
+
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <div class = "postlabel">
+                {{ form.body.label }}<br>
+                <div class = "postmessage"></div>{{ form.body}}
+            </div>
+            <div>
+            {{ form.submit(class="button") }}
+            </div>
+        </form>
+    {% endif %}
+
+{% endblock %}

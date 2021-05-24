@@ -1,0 +1,50 @@
+<html>
+    <div class ="background">
+    <head >
+        
+        {{ moment.include_jquery() }}
+        {{ moment.include_moment() }}
+        
+       {% if title %}
+          <title>{{ title }} - Within Reach </title>
+       {% else %}
+          <title> Welcome to Within Reach! </title>
+       {% endif %}
+       <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    </head>
+
+    <body>
+        <div class ="nav-container">
+        <table>
+            <tr>
+                <td><a href="{{ url_for('index') }}" class = "homebutton">Home</a></td>
+                <!-- Update user location upon clicking on "create Post" -->
+                
+                {% if current_user.is_anonymous %}
+                    <td><a href="{{ url_for('login') }}" class = "logbutton"> Login </a></td>
+                {% else %}
+                    <td><a href="{{ url_for('createpost') }}" id = "updateLocation" class = "postbutton"> Create Post </a></td>
+                    <p id="status"></p>
+                    <script type="text/javascript" src="static/location.js"></script>
+                    <td><a href="{{ url_for('logout') }}" class = "logbutton"> Logout </a></td>
+                    <td class = "currentuser"> Current user: <span class="useritem">{{ current_user.username }} </span></td>
+                    <td class = "currentkarma"> Karma: <span class="useritem">{{ current_user.karma }} </span></td>
+                {% endif %}
+            </tr>
+        </table>
+        </div>
+        <div>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                <div class ="flash-container"> {{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            {% block content %} {% endblock %}
+        </div>
+
+    </body>
+    </div>
+</html>

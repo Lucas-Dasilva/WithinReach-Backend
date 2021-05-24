@@ -1,0 +1,79 @@
+<div>
+    <table class = "posttable">
+            <!-- tr is Columns, td is Rows -->
+            {% if reply.user_id == current_user.id %}
+                <tr> 
+                    <td colspan="3"><div class="posttitle"> Posted by You </div>
+                    </td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td class ="postbody" width= "80%">
+                    <div class="postbody">{{reply.body}}</div>
+                    <br>
+                    <div class="posttime">{{ moment(post.timestamp).fromNow() }}</div>
+                </td>
+                <td class ="likeImg" width = "5%">
+                    <!-- If the reply belongs to local user then display an upvoted version(Unclickable) -->
+                    {% if reply.user_id == current_user.id %}
+                        <br>
+                        <img class = "like" src="{{ url_for('static', filename = 'clickedArrowUp.png' )}}"  width="50">
+                        <br>
+                        <div class="likecount">{{reply.likes}}</div>
+                        <img class = "like" src="{{ url_for('static', filename = 'arrowDown.png' )}}"  width="50">
+                        <br>
+                    <!-- If post belongs to other users, local user can reaact to it -->
+                    {% else %}
+                        {% set ns = namespace(found=false) %}
+                        <!-- Scroll through posts that user has reacted to and match with current post -->
+
+                        {% for reaction in user.reactionsR %}
+                            {% if (reaction.user_id == current_user.id) and (reaction.reply == reply.id) %}
+                                {% set ns.found = true %}
+                                <!-- If they have upvoted it display green up arrow -->
+                                {% if reaction.status == 1 %}
+                                    {% set ns.found = true %}
+
+                                    <br>
+                                    <a href="{{ url_for('upVoteReply',reply_id=reply.id) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'clickedArrowUp.png' )}}"  width="50"> </a>
+                                    <br>
+                                    <div class="likecount">{{reply.likes}}</div>
+                                    <a href="{{ url_for('downVoteReply',reply_id=reply.id) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'arrowDown.png' )}}"  width="50"> </a>
+                                    <br>
+                                <!-- If they have downvoted it display green down arrow -->
+                                {% elif reaction.status == -1 %}
+                                    {% set ns.found = true %}
+                                    <br>
+                                    <a href="{{ url_for('upVoteReply',reply_id=reply.id) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'arrowUp.png' )}}"  width="50"> </a>
+                                    <br>
+                                    <div class="likecount">{{reply.likes}}</div>
+                                    <a href="{{ url_for('downVoteReply',reply_id=reply.id) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'clickedArrowDownn.png' )}}"  width="50"> </a>
+                                    <br>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% if ns.found == false %}
+                        <br>
+                            <a href="{{ url_for('upVoteReply',reply_id =reply.id) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'arrowUp.png' )}}"  width="50"> </a>
+                            <br>
+                            <div class="likecount">{{reply.likes}}</div>
+                            <a href="{{ url_for('downVoteReply',reply_id =reply.id) }}" width = "35" ><img class = "like" src="{{ url_for('static', filename = 'arrowDown.png' )}}"  width="50"> </a>
+                            <br>
+                    {% endif %}
+                {% endif %}
+                <br>
+                <br>
+                </td>
+                <td width = "100%">
+                      {% if reply.user_id == current_user.id %}
+                          <form action="{{ url_for('deleteR', reply_id = reply.id) }}" method="post">
+                              <input class = "deletebutton" type="submit" value="⤫ 𝘿𝙀𝙇𝙀𝙏𝙀" >
+                          </form>
+                          <form action="{{ url_for('editR', reply_id = reply.id) }}" method="post">
+                              <input class = "editbutton" type="submit" value="✎ 𝙀𝘿𝙄𝙏" >
+                          </form>
+                      {% endif %}
+                </td>
+            </tr>
+    </table>
+</div>
