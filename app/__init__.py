@@ -7,7 +7,7 @@ from flask_login import LoginManager
 from flask_cors import CORS
 
 application = app = Flask(__name__)
-
+CORS(app)
 ENV = 'prod'
 if ENV == 'dev':
   app.debug = True
