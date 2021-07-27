@@ -4,9 +4,7 @@ from datetime import datetime, timedelta
 from flask import render_template, flash, redirect, url_for, request, session
 from flask_sqlalchemy import sqlalchemy
 from math import sin,cos, sqrt, atan2, radians, asin, pi
-
 from sqlalchemy import func
-
 from app import app, db
 from app.forms import PostForm, SortForm, ReplyForm, LoginForm, RegistrationForm
 from app.models import Post, Reply, User, reactedPost,reactedReply
@@ -19,7 +17,6 @@ from app import moment
 
 @app.before_first_request
 def initDB(*args, **kwargs):
-    session.permanent = True
     db.create_all()
 
 
@@ -30,12 +27,11 @@ def initDB(*args, **kwargs):
 def createUser():
     if request.method == 'POST':
         jUser = request.get_json()
-        
         if(User.query.get(jUser["user_id"])):
-            print("User already exists")
+            print("User already exists!")
             return ("User Already Exists", 200)
         else:    
-            print("User Doesnt exists")
+            print("Creating new user...")
             newuser = User(id = jUser["user_id"])
             db.session.add(newuser)
             db.session.commit()
@@ -50,7 +46,6 @@ def createPostHandler():
         postBody = jPost['post_body']
         latitude = jPost['latitude']
         longitude = jPost['longitude']
-        
         newpost = Post(body = postBody, latitude = latitude,longitude = longitude, user_id = user_id)
         db.session.add(newpost)
         db.session.commit()
@@ -244,37 +239,47 @@ def downVoteReplyHandler():
 ######################
 ####Get Requests######
 ######################
-@app.route("/getUser/<user_id>", methods = ['GET'])
-def getUser(user_id):
+@app.route("/getUser", methods = ['GET'])
+def getUser():
     if request.method == 'GET':
+        user_id = request.headers.get('user_id')
+        print("User Id:", user_id)
         if (User.query.get(user_id)):
             user = User.query.get(user_id)
             return jsonify(user.serialize())
         else:
-            return("User Not yet Created")
+            print("User Doesnt exists")
+            return("User Hasn't been created", 401)
 
 #Posts whithin distance and sorted by time
-@app.route("/getPosts/<latitude>/<longitude>/<user_id>", methods = ['GET'])
-def getPosts(latitude, longitude, user_id):
+@app.route("/getPosts", methods = ['GET'])
+def getPosts():
     if request.method == 'GET':
+        latitude = request.headers.get('latitude')
+        longitude = request.headers.get('longitude')
+        user_id = request.headers.get('user_id')
         return (filterPosts(latitude,longitude, 1, user_id))
 
 #Posts whithin distance and sorted by Likes
-@app.route("/getPostsSorted/<latitude>/<longitude>/<user_id>", methods = ['GET'])
-def getPostsSorted(latitude, longitude, user_id):
+@app.route("/getPostsSorted", methods = ['GET'])
+def getPostsSorted():
     if request.method == 'GET':
+        latitude = request.headers.get('latitude')
+        longitude = request.headers.get('longitude')
+        user_id = request.headers.get('user_id')
         return (filterPosts(latitude,longitude, 0, user_id))
 
 
-@app.route("/getReplys/<post_id>/<user_id>", methods = ['GET'])
-def getReplys(post_id,user_id):
+@app.route("/getReplys/<post_id>", methods = ['GET'])
+def getReplys(post_id):
     if request.method == 'GET':
+        user_id = request.headers.get('user_id')
         #Get Single Post
         post = Post.query.get(post_id)
         post_reactions = reactedPost.query.filter(user_id == reactedPost.user_id)
         #Get replys for for post
         replys = Reply.query.filter(post_id == Reply.post) #Filtering out replys that belong to post
-        replys = replys.order_by(Reply.timestamp.desc()) #Sorting it by time
+        replys = replys.order_by(Reply.timestamp.asc()) #Sorting it by time
         reactions = reactedReply.query.filter(user_id == reactedReply.user_id) #filtering reply reactions by local user
         jReplys = jsonify(post=post.serialize(), 
                         post_reactions=[i.serialize() for i in post_reactions],
@@ -282,10 +287,11 @@ def getReplys(post_id,user_id):
                         react_list=[i.serialize() for i in reactions])
         return (jReplys)
         
-@app.route("/getSinglePost/<post_id>/<user_id>", methods = ['GET'])
-def getSinglePost(post_id, user_id):
+@app.route("/getSinglePost/<post_id>", methods = ['GET'])
+def getSinglePost(post_id):
     if request.method == 'GET':
         post = Post.query.get(post_id)
+        user_id = request.headers.get("user_id")
         reactions = reactedPost.query.filter(user_id == reactedPost.user_id)
         if(post):
             jPosts = jsonify(post=[post.serialize()], react_list=[i.serialize() for i in reactions])
@@ -742,9 +748,8 @@ def logout():
 @login_required
 def delete(post_id):
     thepost = Post.query.get(post_id)
-    allPosts = userDistance.query.all()
+    allPosts = Post.query.all()
     for post in allPosts:
-
         if post.post_id == int(post_id):
             db.session.delete(post)
             db.session.commit()
