@@ -64,16 +64,6 @@ def createReplyHandler():
         db.session.commit()
         return ("Okay", 200)
 
-
-# @app.route("/getLocation", methods = ['POST'])
-# def locationHandler():
-#     if request.method == 'POST':
-#         location = request.get_json()
-#     #Must be rounded to avoid calc_dist issues
-#     session['latitude'] = round(location['latitude'],7)
-#     session['longitude'] = round(location['longitude'],7)
-#     return ("Okay", 200)
-
 @app.route("/upvoteHandler", methods = ['POST'])
 def upvoteHandler():
     if request.method == 'POST':

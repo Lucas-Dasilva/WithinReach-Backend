@@ -9,7 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 import uuid
 
 class User(db.Model):
-    id = db.Column(UUID(as_uuid=True), primary_key=True, unique=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, unique=True, default=uuid.uuid4)
     karma = db.Column(db.Integer, default = 100, nullable = False)
     def serialize(self):
         return {"id": self.id,
