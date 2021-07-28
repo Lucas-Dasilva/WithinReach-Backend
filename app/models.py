@@ -25,7 +25,7 @@ class Post(db.Model):
     likes = db.Column(db.Integer, default= 1, nullable=False)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'))
+    user_id = db.Column(db.String, db.ForeignKey('user.id'))
     replies = db.relationship('Reply', backref='replypost', lazy='dynamic')
     reactions = db.relationship('reactedPost', backref='reactionpost', lazy='dynamic')
 
@@ -45,7 +45,7 @@ class Reply(db.Model):
     timestamp = db.Column(db.DateTime, index=True, nullable = False, default=datetime.utcnow)
     likes = db.Column(db.Integer, default=1)
     post = db.Column(db.Integer, db.ForeignKey('post.id'))
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'))
+    user_id = db.Column(db.String, db.ForeignKey('user.id'))
     reactions = db.relationship('reactedReply', backref='reactionreply', lazy='dynamic')
 
     def serialize(self):
@@ -61,7 +61,7 @@ class reactedPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     post = db.Column(db.Integer, db.ForeignKey('post.id'))
     status = db.Column(db.Integer, default = 0)    # Nothing = 0, upvote = 1, downvote = -1
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'))
+    user_id = db.Column(db.String, db.ForeignKey('user.id'))
     def serialize(self):
         return {"id": self.id,
                 "post": self.post,
@@ -74,7 +74,7 @@ class reactedReply(db.Model):
     reply = db.Column(db.Integer, db.ForeignKey('reply.id'))
     # Nothing = 0, upvote = 1, downvote = -1
     status = db.Column(db.Integer, default = 0)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'))
+    user_id = db.Column(db.String, db.ForeignKey('user.id'))
     post = db.Column(db.Integer, db.ForeignKey('post.id'))
 
     def serialize(self):
