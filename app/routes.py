@@ -320,7 +320,9 @@ def filterPosts(latitude,longitude, sort, user_id):
     for post in posts:
         dist = distance(post.latitude,post.longitude, latitude, longitude)
         # Delete post if it has enough dislikes
+        print("post body:", post.body)
         if (post.likes <= 5):
+            print("post has less than 5 likes", post.id)
             deleteOldPost(post)
         #1.5 Mile Radius
         if(dist < 1.5):
