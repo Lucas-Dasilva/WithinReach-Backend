@@ -35,7 +35,7 @@ def createUser():
             newuser = User(id = jUser["user_id"])
             db.session.add(newuser)
             db.session.commit()
-            return ("Ok", 200)
+            return ("Created New User", 200)
 
 #Create Post: Creates new post
 @app.route('/createPostHandler', methods=['POST'])
