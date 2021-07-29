@@ -317,16 +317,18 @@ def filterPosts(latitude,longitude, sort, user_id):
 
     #Scrolls through posts within a 1.5 mile to 10 mile radius
     #depending on post volume, the geo-based radius can expand to a 10 mile ring
-    for i in posts:
-        dist = distance(i.latitude,i.longitude, latitude, longitude)
+    for post in posts:
+        dist = distance(post.latitude,post.longitude, latitude, longitude)
+        # Delete post if it has enough dislikes
+        if (post.likes <= 5):
+            deleteOldPost(post)
         #1.5 Mile Radius
         if(dist < 1.5):
             posts_whithin_reach += 1
-            objPost = i.serialize()
+            objPost = post.serialize()
             objPost["distance"] = dist
             post_list.append(objPost)
     #Checking if there is enough posts in radius. Min=5 Posts
-    #Yep
     if (posts_whithin_reach <= 10):
         posts_whithin_reach = 0
         post_list = []
@@ -357,6 +359,7 @@ def filterPosts(latitude,longitude, sort, user_id):
             time_passed = datetime.utcnow() -  i.timestamp 
             if (time_passed.days > 7):
                 deleteOldPost(i)
+
     #Merging reaction list with posts
     reactions = reactedPost.query.filter(user_id == reactedPost.user_id)
     #Setting new Post list
